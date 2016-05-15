@@ -3,6 +3,3 @@ Messenger::Bot.config do |config|
   config.validation_token = 'total_secret'
   config.secret_token = '8a81891bf89a8b71b5ba70f0bc201896'
 end
-
-
-
