@@ -2,9 +2,3 @@
 
 require ::File.expand_path('../config/environment', __FILE__)
 run Rails.application
-
-
-require 'facebook/messenger'
-require_relative 'bot'
-
-run Facebook::Messenger::Server
