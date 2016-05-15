@@ -5,7 +5,7 @@ source 'https://rubygems.org'
 gem 'rails', '4.2.4'
 # Use sqlite3 as the database for Active Record
 # gem 'sqlite3'
-gem 'pg'
+
 # Use SCSS for stylesheets
 gem 'sass-rails', '~> 5.0'
 # Use Uglifier as compressor for JavaScript assets
@@ -15,7 +15,7 @@ gem 'coffee-rails', '~> 4.1.0'
 gem 'facebook-messenger'
 gem 'pry-rails'
 gem 'messenger-bot'
-
+# gem 'pg'
 # See https://github.com/rails/execjs#readme for more supported runtimes
 # gem 'therubyracer', platforms: :ruby
 
@@ -45,6 +45,7 @@ end
 group :development do
   # Access an IRB console on exception pages or by using <%= console %> in views
   gem 'web-console', '~> 2.0'
+  gem 'pg'
 
   # Spring speeds up development by keeping your application running in the background. Read more: https://github.com/rails/spring
   gem 'spring'
