@@ -7,6 +7,7 @@ class MessengerBotController < ActionController::Base
   end
 
   def delivery(event, sender)
+    puts "#{event}"
     puts "I am in delivery"
   end
 
@@ -14,8 +15,8 @@ class MessengerBotController < ActionController::Base
     puts "I am in postback"
     payload = event["postback"]["payload"]
     case payload
-    when :something
-      #ex) process sender.reply({text: "button click event!"})
+    when :hello
+      sender.reply({text: "Sorry don;t like hello"})
     end
   end
 end
