@@ -1,5 +1,5 @@
 Messenger::Bot.config do |config|
-  config.access_token = 'EAAGE6upBuisBABdikqNINoK0twYRYimZBWrUoiZBlVBFbv7Se3WGi40gmoJjnTAjl8ZCvWEbgFA9BFoikynft6yjvMPHgfhoz21EEsHy5P6FdmdZANt2TtRldZA5QBnlX7zTyWh1eL9dcXB9ZCK4vUK78WE58PwGeSsQU6xHWQNwZDZD'
+  config.access_token = 'EAAGE6upBuisBAE9kknS1soI9L11my7cZAQoDNhNMxlfaU9zC8UNUuVlP8L09r1YIKJY5PTTS854xxdBcCLxqco8Tmj0HxZBkWGb4q1xsn7QTCKqbmkN1M6xgN3cAZBT0CDZBKLOzfUeZCcZBvT46kHKT23LY1mf3JzEZBA8nAzAIAZDZD'
   config.validation_token = 'total_secret'
   config.secret_token = '8a81891bf89a8b71b5ba70f0bc201896'
 end
