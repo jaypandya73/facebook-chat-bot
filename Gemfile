@@ -3,6 +3,7 @@ source 'https://rubygems.org'
 
 # Bundle edge Rails instead: gem 'rails', github: 'rails/rails'
 gem 'rails', '5.0.0'
+gem 'pg'
 # Use sqlite3 as the database for Active Record
 
 # Use SCSS for stylesheets
@@ -41,10 +42,9 @@ gem 'sdoc', '~> 0.4.0', group: :doc
 group :development, :test do
   # Call 'byebug' anywhere in the code to stop execution and get a debugger console
   gem 'byebug'
-  gem 'sqlite3'
+  # gem 'sqlite3'
 
 end
-gem 'pg',"0.17.1"
 
 group :development do
   # Access an IRB console on exception pages or by using <%= console %> in views
