@@ -72,7 +72,7 @@ Bot.on :message do |message|
     )
 
   when /live score/i || /score/i
-    teams = ["India", "Sri Lanka", "West Indies", "South Africa", "Pakistan"]
+    teams = ["India", "Sri Lanka", "West Indies", "South Africa", "Pakistan", "Australia"]
     response = HTTParty.get('http://cricscore-api.appspot.com/csa')
     results = response.select {|m| teams.include?(m['t1']) }.inject([]) {|arr,t| arr << [[t['t1'],t['t2']],t['id']]; arr }
     message.reply(
