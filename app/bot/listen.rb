@@ -1,9 +1,7 @@
 require "facebook/messenger"
 #
 include Facebook::Messenger
-#
-# # ACCESS_TOKEN = 'EAAGE6upBuisBALWTBa9RAdSWMv4ZA2gE4WmZB43lTMlMCOcrqIR0m3qwxnvHdX0OZBEF7ORZALXMV6ZAUib85QorJBd4Cyb2hTFeFqZC2DdkKuaWgVZAlbaUGSsJNZBGlTOxh59rDZB4SllH92PSY2ZA9fxj2BsQy4Ex9kYabv0RZCligZDZD'
-#
+
 Facebook::Messenger::Subscriptions.subscribe(access_token: ENV['ACCESS_TOKEN'])
 #
 # Bot.on :message do |message|
@@ -57,9 +55,7 @@ Bot.on :message do |message|
 
   puts "#{message.messaging}"
   message.typing_on
-  # message.reply(
-  #   text: 'Hey there!'
-  # )
+
   m_reply = message.text
 
   case m_reply
@@ -128,13 +124,11 @@ Bot.on :message do |message|
         text: 'Sorry no luck.'
        )
       end
+    else
+      message.reply(
+        text: "Type score to get latest scores about recent matches. Don't forget to like page. :)"
+      )
     end
-    # message.reply(
-    #   text: 'You are now marked for extermination.'
-    # )
-    # message.reply(
-    #   text: 'Have a nice day.'
-    # )
   end
 end
 
