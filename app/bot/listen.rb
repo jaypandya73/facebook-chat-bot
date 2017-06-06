@@ -77,8 +77,8 @@ Facebook::Messenger::Profile.set({
         },
         {
           type: 'web_url',
-          title: 'Get some help',
-          url: 'https://github.com/hyperoslo/facebook-messenger',
+          title: 'Breaking cricket news!',
+          url: 'https://www.cricbuzz.com/cricket-news',
           webview_height_ratio: 'full'
         }
       ]
