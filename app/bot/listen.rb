@@ -3,7 +3,7 @@ require "facebook/messenger"
 include Facebook::Messenger
 
 Facebook::Messenger::Subscriptions.subscribe(access_token: ENV['ACCESS_TOKEN'])
-#
+# https://bot-facebook-test.herokuapp.com/bot
 # Bot.on :message do |message|
 #   if message.text == 'score'
 #     text =  get_latest_cricket_score
@@ -40,15 +40,78 @@ end
 #     puts e.backtrace.join("\n")
 #   end
 # end
+# Greeting Text.
+Facebook::Messenger::Profile.set({
+  greeting: [
+    {
+      locale: 'default',
+      text: 'CricCric welcomes you! :)'
+    }
+  ]
+}, access_token: ENV['ACCESS_TOKEN'])
 
-# Facebook::Messenger::Profile.set({
-#   greeting: [
-#     {
-#       locale: 'default',
-#       text: 'Welcome to your new bot CricCric!'
-#     }
-#   ]
-# }, access_token: ENV['ACCESS_TOKEN'])
+# Get started button.
+Facebook::Messenger::Profile.set({
+  get_started: {
+    payload: 'START'
+  }
+}, access_token: ENV['ACCESS_TOKEN'])
+
+#persistent menu
+Facebook::Messenger::Profile.set({
+  persistent_menu: [
+    {
+      locale: 'default',
+      composer_input_disabled: true,
+      call_to_actions: [
+        {
+          title: 'My Account',
+          type: 'nested',
+          call_to_actions: [
+            {
+              title: 'Contact Info',
+              type: 'postback',
+              payload: 'CONTACT_INFO_PAYLOAD'
+            }
+          ]
+        },
+        {
+          type: 'web_url',
+          title: 'Get some help',
+          url: 'https://github.com/hyperoslo/facebook-messenger',
+          webview_height_ratio: 'full'
+        }
+      ]
+    }
+  ]
+}, access_token: ENV['ACCESS_TOKEN'])
+
+# Postback logic
+
+Bot.on :postback do |postback|
+  puts "I am in postback #{postback}"
+  case postback.payload
+  when 'HUMAN_LIKED'
+    text = 'That makes bot happy!'
+  when 'HUMAN_DISLIKED'
+    text = 'Oh.'
+  when 'SQUARE_IMAGES'
+    text = 'Okay getting it...'
+    message_options = {
+      recipient: { id: postback.sender['id'] },
+      message: { text: text }
+    }
+    Bot.deliver(message_options, access_token: ENV['ACCESS_TOKEN'])
+  when 'START'
+    text = 'Welcome to Cric'
+  when 'CONTACT_INFO_PAYLOAD'
+    text = "Contact to Jay. Email: jayved128@gmail.com"
+  end
+
+  postback.reply(
+    text: text
+  )
+end
 
 Bot.on :message do |message|
   puts "Received '#{message.inspect}' from #{message.sender}"
@@ -58,8 +121,44 @@ Bot.on :message do |message|
 
   m_reply = message.text
 
+
   case m_reply
-  when /hello/i || /hi/i
+
+  when /image/i
+    # message.reply(text: 'got it')
+    message.reply(
+      attachment: {
+        type: 'template',
+        payload: {
+              template_type: 'generic',
+              image_aspect_ratio: 'horizontal',
+              elements: [{
+                title: 'Random image',
+                # Horizontal image should have 1.91:1 ratio
+                image_url: 'https://unsplash.it/760/400?random',
+                subtitle: "Cricbuzz",
+                default_action: {
+                  type: 'web_url',
+                  url: 'https://cricbuzz.com'
+                },
+                buttons: [
+                  {
+                    type: :web_url,
+                    url: 'https://cricbuzz.com',
+                    title: 'CricBuzz'
+                  },
+                  {
+                    type: :postback,
+                    title: 'Square Images',
+                    payload: 'SQUARE_IMAGES'
+                  }
+                ]
+              }]
+            }
+      }
+    )
+
+  when /hello/i, /hi/i
     message.reply(
       text: 'Hey there!',
       quick_replies: [
@@ -71,18 +170,22 @@ Bot.on :message do |message|
       ]
     )
 
-  when /live score/i || /score/i
-    teams = ["India", "Sri Lanka", "West Indies", "South Africa", "Pakistan", "Australia"]
+  when /score/i
+    teams = ["India", "Sri Lanka", "West Indies", "South Africa", "Pakistan", "Australia", "England", "New Zealand"]
     response = HTTParty.get('http://cricscore-api.appspot.com/csa')
-    results = response.select {|m| teams.include?(m['t1']) }.inject([]) {|arr,t| arr << [[t['t1'],t['t2']],t['id']]; arr }
-    message.reply(
-      text: 'Fetching score for you',
-      quick_replies:
-        results.inject([]) do |arr,t|
-          arr << { content_type: 'text', title: t[0].join(' vs '), payload: "LIVE_SCORE/#{t[1]}" }
-          arr
-        end
-    )
+    results = response.select {|m| teams.include?(m['t1'])}.inject([]) {|arr,t| arr << [[t['t1'],t['t2']],t['id']]; arr }
+    if results.blank?
+      message.reply(text: 'Sorry currently no match is going on.')
+    else
+      message.reply(
+        text: 'Fetching score for you',
+        quick_replies:
+          results.inject([]) do |arr,t|
+            arr << { content_type: 'text', title: t[0].join(' vs '), payload: "LIVE_SCORE/#{t[1]}" }
+            arr
+          end
+      )
+    end
 
   when /something humans like/i
     message.reply(
@@ -132,18 +235,7 @@ Bot.on :message do |message|
   end
 end
 
-Bot.on :postback do |postback|
-  case postback.payload
-  when 'HUMAN_LIKED'
-    text = 'That makes bot happy!'
-  when 'HUMAN_DISLIKED'
-    text = 'Oh.'
-  end
 
-  postback.reply(
-    text: text
-  )
-end
 
 Bot.on :delivery do |delivery|
   puts "Delivered message(s) #{delivery.ids}"
