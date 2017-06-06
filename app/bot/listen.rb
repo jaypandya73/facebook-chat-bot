@@ -62,7 +62,7 @@ Facebook::Messenger::Profile.set({
   persistent_menu: [
     {
       locale: 'default',
-      composer_input_disabled: true,
+      composer_input_disabled: false,
       call_to_actions: [
         {
           title: 'My Account',
@@ -97,11 +97,11 @@ Bot.on :postback do |postback|
     text = 'Oh.'
   when 'SQUARE_IMAGES'
     text = 'Okay getting it...'
-    message_options = {
-      recipient: { id: postback.sender['id'] },
-      message: { text: text }
-    }
-    Bot.deliver(message_options, access_token: ENV['ACCESS_TOKEN'])
+    # message_options = {
+    #   recipient: { id: postback.sender['id'] },
+    #   message: { text: text }
+    # }
+    # Bot.deliver(message_options, access_token: ENV['ACCESS_TOKEN'])
   when 'START'
     text = 'Welcome to Cric'
   when 'CONTACT_INFO_PAYLOAD'
@@ -115,13 +115,9 @@ end
 
 Bot.on :message do |message|
   puts "Received '#{message.inspect}' from #{message.sender}"
-
   puts "#{message.messaging}"
   message.typing_on
-
   m_reply = message.text
-
-
   case m_reply
 
   when /image/i
