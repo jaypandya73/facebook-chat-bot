@@ -1,9 +1,14 @@
 require "facebook/messenger"
+require_relative 'persistent_menu'
+require_relative 'greeting'
+require_relative 'talk_to_cricket_score_api'
 #
 include Facebook::Messenger
 
 Facebook::Messenger::Subscriptions.subscribe(access_token: ENV['ACCESS_TOKEN'])
 # https://bot-facebook-test.herokuapp.com/bot
+PersistentMenu.enable
+Greeting.enable
 # Bot.on :message do |message|
 #   if message.text == 'score'
 #     text =  get_latest_cricket_score
@@ -19,11 +24,11 @@ Facebook::Messenger::Subscriptions.subscribe(access_token: ENV['ACCESS_TOKEN'])
 #   }, access_token: ENV['ACCESS_TOKEN'])
 # end
 #
-def get_latest_cricket_score
-  agent = Mechanize.new
-  page = agent.get('http://www.cricbuzz.com/')
-  page.search('.cb-ovr-flo').to_a.first.text
-end
+# def get_latest_cricket_score
+#   agent = Mechanize.new
+#   page = agent.get('http://www.cricbuzz.com/')
+#   page.search('.cb-ovr-flo').to_a.first.text
+# end
 #
 # def get_latest_match_score
 #   api_url = 'http://cricapi.com/api/cricketScore'
@@ -40,62 +45,12 @@ end
 #     puts e.backtrace.join("\n")
 #   end
 # end
-# Greeting Text.
-Facebook::Messenger::Profile.set({
-  greeting: [
-    {
-      locale: 'default',
-      text: 'CricCric welcomes you! :)'
-    }
-  ]
-}, access_token: ENV['ACCESS_TOKEN'])
-
-# Get started button.
-Facebook::Messenger::Profile.set({
-  get_started: {
-    payload: 'START'
-  }
-}, access_token: ENV['ACCESS_TOKEN'])
-
-#persistent menu
-Facebook::Messenger::Profile.set({
-  persistent_menu: [
-    {
-      locale: 'default',
-      composer_input_disabled: false,
-      call_to_actions: [
-        {
-          title: 'My Account',
-          type: 'nested',
-          call_to_actions: [
-            {
-              title: 'Contact Info',
-              type: 'postback',
-              payload: 'CONTACT_INFO_PAYLOAD'
-            }
-          ]
-        },
-        {
-          type: 'web_url',
-          title: 'Breaking cricket news!',
-          url: 'https://www.cricbuzz.com/cricket-news',
-          webview_height_ratio: 'full'
-        },
-        {
-          type: 'web_url',
-          title: 'Highlights & Videos',
-          url: 'https://www.icc-cricket.com/video',
-          webview_height_ratio: 'full'
-        }
-      ]
-    }
-  ]
-}, access_token: ENV['ACCESS_TOKEN'])
 
 # Postback logic
 
 Bot.on :postback do |postback|
   puts "I am in postback #{postback}"
+  share = false
   case postback.payload
   when 'HUMAN_LIKED'
     text = 'That makes bot happy!'
@@ -109,14 +64,41 @@ Bot.on :postback do |postback|
     # }
     # Bot.deliver(message_options, access_token: ENV['ACCESS_TOKEN'])
   when 'START'
-    text = 'Welcome to Cric'
+    text = "Welcome to CricCric! Instead of waiting for website to load the score, ask me and I will fetch you the score. If you like me don't forget to share it with your cricket fans :)"
   when 'CONTACT_INFO_PAYLOAD'
     text = "Contact to Jay. Email: jayved128@gmail.com"
+  when 'SHARE_AND_INVITE'
+    share = true
+    message_options = {
+      recipient: { id: postback.sender['id'] },
+      message: {
+        attachment: {
+          type: 'template',
+          payload: {
+            template_type: 'generic',
+            image_aspect_ratio: 'horizontal',
+            elements: [{
+              title: 'CricCric bot image',
+              image_url: 'https://cdn.pixabay.com/photo/2014/04/02/16/19/ball-306904_960_720.png',
+              subtitle: "CricCric",
+              buttons: [
+                {
+                  type: :element_share
+                }
+              ]
+            }]
+          }
+        }
+      }
+     }
+    Bot.deliver(message_options, access_token: ENV['ACCESS_TOKEN'])
   end
 
-  postback.reply(
-    text: text
-  )
+  unless share
+    postback.reply(
+      text: text
+    )
+  end
 end
 
 Bot.on :message do |message|
@@ -126,43 +108,62 @@ Bot.on :message do |message|
   m_reply = message.text
   case m_reply
 
-  when /image/i
-    # message.reply(text: 'got it')
+  # when /image/i
+  #   message.reply(
+  #     attachment: {
+  #       type: 'template',
+  #       payload: {
+  #           template_type: 'generic',
+  #           image_aspect_ratio: 'horizontal',
+  #           elements: [{
+  #             title: 'Random image',
+  #             image_url: 'https://unsplash.it/760/400?random',
+  #             subtitle: "Cricbuzz",
+  #             default_action: {
+  #               type: 'web_url',
+  #               url: 'https://cricbuzz.com'
+  #             },
+  #             buttons: [
+  #               {
+  #                 type: :web_url,
+  #                 url: 'https://cricbuzz.com',
+  #                 title: 'CricBuzz'
+  #               },
+  #               {
+  #                 type: :postback,
+  #                 title: 'Square Images',
+  #                 payload: 'SQUARE_IMAGES'
+  #               }
+  #             ]
+  #           }]
+  #         }
+  #     }
+  #   )
+
+  when /invite/i, /share/i
     message.reply(
       attachment: {
         type: 'template',
         payload: {
-              template_type: 'generic',
-              image_aspect_ratio: 'horizontal',
-              elements: [{
-                title: 'Random image',
-                # Horizontal image should have 1.91:1 ratio
-                image_url: 'https://unsplash.it/760/400?random',
-                subtitle: "Cricbuzz",
-                default_action: {
-                  type: 'web_url',
-                  url: 'https://cricbuzz.com'
-                },
-                buttons: [
-                  {
-                    type: :web_url,
-                    url: 'https://cricbuzz.com',
-                    title: 'CricBuzz'
-                  },
-                  {
-                    type: :postback,
-                    title: 'Square Images',
-                    payload: 'SQUARE_IMAGES'
-                  }
-                ]
-              }]
-            }
+          template_type: 'generic',
+          image_aspect_ratio: 'horizontal',
+          elements: [{
+            title: 'CricCric bot image',
+            image_url: 'https://cdn.pixabay.com/photo/2014/04/02/16/19/ball-306904_960_720.png',
+            subtitle: "CricCric",
+            buttons: [
+              {
+                type: :element_share
+              }
+            ]
+          }]
+        }
       }
     )
 
   when /hello/i, /hi/i
     message.reply(
-      text: 'Hey there!',
+      text: "Hey there!\nWant live score?",
       quick_replies: [
         {
           content_type: 'text',
@@ -173,23 +174,9 @@ Bot.on :message do |message|
     )
 
   when /score/i
-    teams = ["India", "Sri Lanka", "West Indies", "South Africa", "Pakistan", "Australia", "England", "New Zealand"]
-    response = HTTParty.get('http://cricscore-api.appspot.com/csa')
-    results = response.select {|m| teams.include?(m['t1'])}.inject([]) {|arr,t| arr << [[t['t1'],t['t2']],t['id']]; arr }
-    if results.blank?
-      message.reply(text: 'Sorry currently no match is going on.')
-    else
-      message.reply(
-        text: 'Fetching score for you',
-        quick_replies:
-          results.inject([]) do |arr,t|
-            arr << { content_type: 'text', title: t[0].join(' vs '), payload: "LIVE_SCORE/#{t[1]}" }
-            arr
-          end
-      )
-    end
+    show_matches_if_any(message.sender['id'])
 
-  when /something humans like/i
+  when /show me gif for fun/i
     message.reply(
       text: 'I found something humans seem to like:'
     )
@@ -220,9 +207,11 @@ Bot.on :message do |message|
     if(message.messaging['message']['quick_reply'] != nil)
       if message.messaging['message']['quick_reply']['payload'].split('/')[0] == 'LIVE_SCORE'
        id = message.messaging['message']['quick_reply']['payload'].split('/')[1].to_i
-       response = HTTParty.get("http://cricscore-api.appspot.com/csa?id=#{id}")
+      #  response = HTTParty.get("http://cricscore-api.appspot.com/csa?id=#{id}")
+      response = TalkToCricketScoreApi.post(id)
        message.reply(
-         text: "#{response[0]['de']}"
+        #  text: "#{response[0]['de']}"
+        text: "#{response['score']}\n\nMatch Status: #{response['innings-requirement']}"
        )
       else
        message.reply(
@@ -231,10 +220,41 @@ Bot.on :message do |message|
       end
     else
       message.reply(
-        text: "Type score to get latest scores about recent matches. Don't forget to like page. :)"
+        text: "Sorry did't get you. Click on live score button to get latest score updates.",
+        quick_replies: [
+          {
+            content_type: 'text',
+            title: 'Live score',
+            payload: 'SCORE'
+          }
+        ]
       )
     end
   end
+end
+
+def show_matches_if_any(recipient_id)
+  teams = TalkToCricketScoreApi::ALLOWED_TEAMS
+  response = TalkToCricketScoreApi.fetch_team_lists_with_unq_id
+  results = response.select {|m| teams.include?(m['t1'])}.inject([]) {|arr,t| arr << [[t['t1'],t['t2']],t['id']]; arr }
+  quick_replies = ''
+  if results.blank?
+    text = 'Sorry currently no live match is going on.'
+  else
+    text = 'Please choose team to see live score:'
+    quick_replies = results.inject([]) do |arr,t|
+      arr << { content_type: 'text', title: t[0].join(' vs '), payload: "LIVE_SCORE/#{t[1]}" }
+      arr
+    end
+  end
+  message_options = {
+    recipient: { id: recipient_id },
+    message: { text: text }
+    }
+  if quick_replies.present?
+    message_options[:message][:quick_replies] = quick_replies
+  end
+  Bot.deliver(message_options, access_token: ENV['ACCESS_TOKEN'])
 end
 
 
