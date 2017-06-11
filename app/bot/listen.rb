@@ -161,7 +161,7 @@ Bot.on :message do |message|
       }
     )
 
-  when /hello/i, /hi/i
+  when /hello/i, /hi/i, /hey/i
     message.reply(
       text: "Hey there!\nWant live score?",
       quick_replies: [
