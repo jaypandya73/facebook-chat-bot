@@ -151,6 +151,10 @@ Bot.on :message do |message|
             title: 'CricCric bot image',
             image_url: 'https://cdn.pixabay.com/photo/2014/04/02/16/19/ball-306904_960_720.png',
             subtitle: "CricCric",
+            default_action: {
+              type: 'web_url',
+              url: 'https://www.facebook.com/getcrick'
+            },
             buttons: [
               {
                 type: :element_share
