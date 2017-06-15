@@ -13,7 +13,7 @@ class TalkToCricketScoreApi
 
   def self.fetch_selected_teams
     all_teams = fetch_team_lists_with_unq_id
-    all_teams.select {|m| ALLOWED_TEAMS.include?(m['t1'])}.inject([]) {|arr,t| arr << [[t['t1'],t['t2']],t['id']]; arr }
+    all_teams.select {|m| ALLOWED_TEAMS.include?(m['t1'] || m['t2'] )}.inject([]) {|arr,t| arr << [[t['t1'],t['t2']],t['id']]; arr }
   end
 
   def self.fetch_score_details(unique_id)
