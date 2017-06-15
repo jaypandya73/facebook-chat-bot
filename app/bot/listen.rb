@@ -212,7 +212,7 @@ Bot.on :message do |message|
       if message.messaging['message']['quick_reply']['payload'].split('/')[0] == 'LIVE_SCORE'
        id = message.messaging['message']['quick_reply']['payload'].split('/')[1].to_i
       #  response = HTTParty.get("http://cricscore-api.appspot.com/csa?id=#{id}")
-      response = TalkToCricketScoreApi.post(id)
+      response = TalkToCricketScoreApi.fetch_score_details(id)
        message.reply(
         #  text: "#{response[0]['de']}"
         text: "#{response['score']}\n\nMatch Status: #{response['innings-requirement']}"
@@ -238,9 +238,9 @@ Bot.on :message do |message|
 end
 
 def show_matches_if_any(recipient_id)
-  teams = TalkToCricketScoreApi::ALLOWED_TEAMS
-  response = TalkToCricketScoreApi.fetch_team_lists_with_unq_id
-  results = response.select {|m| teams.include?(m['t1'])}.inject([]) {|arr,t| arr << [[t['t1'],t['t2']],t['id']]; arr }
+  # teams = TalkToCricketScoreApi::ALLOWED_TEAMS
+  # response = TalkToCricketScoreApi.fetch_team_lists_with_unq_id
+  results = TalkToCricketScoreApi.fetch_selected_teams
   quick_replies = ''
   if results.blank?
     text = 'Sorry currently no live match is going on.'
